@@ -15,7 +15,9 @@ opts = {strict_variables: true, strict_filters: true}
 
 loop do
     template_input = STDIN.gets
+    exit 0 if template_input.nil?
     context_input = STDIN.gets
+    exit 1 if context_input.nil?
     begin
         template = Liquid::Template.parse(JSON.load(template_input))
         context = JSON.parse(context_input)
@@ -41,6 +43,12 @@ class LiquidRenderer:
 
     def __init__(self):
         self.worker = Popen(self.command, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+
+    def stop(self):
+        self.worker.stdout.close()
+        self.worker.stderr.close()
+        self.worker.stdin.close()
+        self.worker.wait()
 
     def send(self, message):
         self.worker.stdin.write(json.dumps(message).encode())
