@@ -63,8 +63,9 @@ class LiquidRenderer:
         try:
             reply = next(self.worker.stdout)
         except StopIteration as exc:
-            logger.exception()
-            raise WorkerError(exc)
+            info = self.worker.stderr.read().decode('utf-8')
+            logger.error(info)
+            raise WorkerError(info)
 
         try:
             reply_data = json.loads(reply.decode('utf-8'))
