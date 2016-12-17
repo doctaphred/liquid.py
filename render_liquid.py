@@ -13,11 +13,9 @@ require 'liquid'
 
 opts = {strict_variables: true, strict_filters: true}
 
-loop do
-    input = STDIN.gets
-    exit 0 if input.nil?
+STDIN.each do |message|
     begin
-        args = JSON.parse(input)
+        args = JSON.parse(message)
         template = Liquid::Template.parse(args["template"])
         result = template.render(args["context"], opts)
         ok = true
