@@ -35,18 +35,21 @@ class RenderError(ValueError):
     pass
 
 
-def renderer():
+class LiquidRenderer:
+
     command = ['ruby', '-e', script]
-    worker = Popen(command, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 
-    def send(message):
-        worker.stdin.write(json.dumps(message).encode())
-        worker.stdin.write(b'\n')
-        worker.stdin.flush()
+    def __init__(self):
+        self.worker = Popen(self.command, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 
-    def recv():
+    def send(self, message):
+        self.worker.stdin.write(json.dumps(message).encode())
+        self.worker.stdin.write(b'\n')
+        self.worker.stdin.flush()
+
+    def recv(self):
         try:
-            reply = next(worker.stdout)
+            reply = next(self.worker.stdout)
         except StopIteration as exc:
             logger.exception()
             raise CalledProcessError(exc)
@@ -70,18 +73,16 @@ def renderer():
         else:
             return result
 
-    def render(template, context):
-        send(template)
-        send(context)
-        return recv()
-
-    return render
+    def render(self, template, context):
+        self.send(template)
+        self.send(context)
+        return self.recv()
 
 
 if __name__ == '__main__':
     import sys
     _, template = sys.argv
-    render = renderer()
+    render = LiquidRenderer().render
     for line in sys.stdin:
         context = json.loads(line)
         rendered = render(template, context)

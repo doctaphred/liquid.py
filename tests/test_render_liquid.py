@@ -1,10 +1,10 @@
 from .utils import assert_raises
 
-from render_liquid import renderer, RenderError
+from render_liquid import LiquidRenderer, RenderError
 
 
 def test_renderer():
-    render = renderer()
+    render = LiquidRenderer().render
 
     template = r"""{{greeting | capitalize}}, {{name | append:'!'}}"""
 
