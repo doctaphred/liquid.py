@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import json
 import logging
-from subprocess import Popen, PIPE, CalledProcessError
+from subprocess import Popen, PIPE
 
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,11 @@ end
 """
 
 
-class RenderError(ValueError):
+class WorkerError(Exception):
+    pass
+
+
+class JobError(Exception):
     pass
 
 
@@ -60,24 +64,23 @@ class LiquidRenderer:
             reply = next(self.worker.stdout)
         except StopIteration as exc:
             logger.exception()
-            raise CalledProcessError(exc)
+            raise WorkerError(exc)
 
         try:
             reply_data = json.loads(reply.decode('utf-8'))
             # TODO: replace with proper schema validation.
             ok = reply_data.pop('ok')
             result = reply_data.pop('result')
-            if reply_data:
-                raise ValueError(reply_data)
+            assert not reply_data
         except Exception as exc:
             # reply.decode, json.loads, or the validation logic may
             # raise arbitrary exceptions; they all represent an error in
             # the subprocess.
             logger.exception(reply)
-            raise CalledProcessError(exc)
+            raise WorkerError(exc)
 
         if not ok:
-            raise RenderError(result)
+            raise JobError(result)
         else:
             return result
 

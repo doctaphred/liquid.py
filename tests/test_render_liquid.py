@@ -1,6 +1,6 @@
 from .utils import assert_raises
 
-from render_liquid import LiquidRenderer, RenderError
+from render_liquid import LiquidRenderer, JobError
 
 
 def test_renderer():
@@ -13,8 +13,8 @@ def test_renderer():
     assert result == 'Hello, world!', result
 
     # Try to break it
-    assert_raises(RenderError, render, 1, 2)
-    assert_raises(RenderError, render, 3, 4)
+    assert_raises(JobError, render, 1, 2)
+    assert_raises(JobError, render, 3, 4)
 
     # Does it still work?
     result = render(template, {'greeting': 'ayy', 'name': 'lmao'})
