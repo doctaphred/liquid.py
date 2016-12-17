@@ -14,14 +14,12 @@ require 'liquid'
 opts = {strict_variables: true, strict_filters: true}
 
 loop do
-    template_input = STDIN.gets
-    exit 0 if template_input.nil?
-    context_input = STDIN.gets
-    exit 1 if context_input.nil?
+    input = STDIN.gets
+    exit 0 if input.nil?
     begin
-        template = Liquid::Template.parse(JSON.load(template_input))
-        context = JSON.parse(context_input)
-        result = template.render(context, opts)
+        args = JSON.parse(input)
+        template = Liquid::Template.parse(args["template"])
+        result = template.render(args["context"], opts)
         ok = true
     rescue => exc
         result = exc
@@ -86,8 +84,7 @@ class LiquidRenderer:
             return result
 
     def render(self, template, context):
-        self.send(template)
-        self.send(context)
+        self.send({'template': template, 'context': context})
         return self.recv()
 
 
